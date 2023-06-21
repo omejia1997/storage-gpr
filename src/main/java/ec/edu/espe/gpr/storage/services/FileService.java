@@ -13,13 +13,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import ec.edu.espe.gpr.storage.enums.ModulosEnum;
+
 @Service
 public class FileService {
 
-    private final Path rootFilesUploadsInvestigacion = Paths.get("uploads");
-    private final Path rootFileGuiaInvestigacion = Paths.get("archivo_guia");
+    private final Path rootFilesUploadsInvestigacion = Paths.get("archivo_tareas_investigacion");
+    private final Path rootFileGuiaInvestigacion = Paths.get("archivo_guia_investigacion");
 
-        
     public void init() {
         try {
             Files.createDirectory(rootFilesUploadsInvestigacion);
@@ -35,21 +36,35 @@ public class FileService {
             throw new RuntimeException("No se puede inicializar la carpeta uploads");
         }
     }
-    
+
     public void deleteAllFileGuia() {
         FileSystemUtils.deleteRecursively(rootFileGuiaInvestigacion.toFile());
     }
 
-    public void saveFileGuia(MultipartFile file, String nameFile) {
-        try {
-            Files.deleteIfExists(this.rootFileGuiaInvestigacion.resolve(nameFile));
-            Files.copy(file.getInputStream(), this.rootFileGuiaInvestigacion.resolve(nameFile));
-        } catch (IOException e) {
-            throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
+    public void saveFileGuia(MultipartFile file, String nameFile, String modulo) {
+        if (modulo.equals(ModulosEnum.INVESTIGACION.getValue())) {//Modulo a guardar
+            try {
+                Files.deleteIfExists(this.rootFileGuiaInvestigacion.resolve(nameFile));
+                Files.copy(file.getInputStream(), this.rootFileGuiaInvestigacion.resolve(nameFile));
+            } catch (IOException e) {
+                throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
+            }
         }
     }
 
-     public void save(MultipartFile file) {
+    public void saveFile(MultipartFile file, String nameFile,String modulo) {
+        if (modulo.equals(ModulosEnum.INVESTIGACION.getValue())) {//Modulo a guardar
+            try {
+                Files.deleteIfExists(this.rootFilesUploadsInvestigacion.resolve(nameFile));
+                Files.copy(file.getInputStream(), this.rootFilesUploadsInvestigacion.resolve(nameFile));
+            } catch (IOException e) {
+                throw new RuntimeException("No se puede guardar el archivo. Error " +
+                        e.getMessage());
+            }
+        }
+    }
+
+    public void save(MultipartFile file) {
         try {
             // copy (que queremos copiar, a donde queremos copiar)
             Files.copy(file.getInputStream(), this.rootFilesUploadsInvestigacion.resolve(file.getOriginalFilename()));
@@ -63,30 +78,29 @@ public class FileService {
             Path file = rootFilesUploadsInvestigacion.resolve(filename);
             Resource resource = new UrlResource(file.toUri());
 
-            if(resource.exists() || resource.isReadable()){
+            if (resource.exists() || resource.isReadable()) {
                 return resource;
-            }else{
+            } else {
                 throw new RuntimeException("No se puede leer el archivo ");
             }
 
-        }catch (MalformedURLException e){
+        } catch (MalformedURLException e) {
             throw new RuntimeException("Error: " + e.getMessage());
         }
     }
-
 
     public Resource loadFileTarea(String filename) {
         try {
             Path file = rootFileGuiaInvestigacion.resolve(filename);
             Resource resource = new UrlResource(file.toUri());
 
-            if(resource.exists() || resource.isReadable()){
+            if (resource.exists() || resource.isReadable()) {
                 return resource;
-            }else{
+            } else {
                 throw new RuntimeException("No se puede leer el archivo ");
             }
 
-        }catch (MalformedURLException e){
+        } catch (MalformedURLException e) {
             throw new RuntimeException("Error: " + e.getMessage());
         }
     }
@@ -95,11 +109,12 @@ public class FileService {
         FileSystemUtils.deleteRecursively(rootFilesUploadsInvestigacion.toFile());
     }
 
-    public Stream<Path> loadAll(){
-        try{
-            return Files.walk(this.rootFilesUploadsInvestigacion,1).filter(path -> !path.equals(this.rootFilesUploadsInvestigacion))
+    public Stream<Path> loadAll() {
+        try {
+            return Files.walk(this.rootFilesUploadsInvestigacion, 1)
+                    .filter(path -> !path.equals(this.rootFilesUploadsInvestigacion))
                     .map(this.rootFilesUploadsInvestigacion::relativize);
-        }catch (RuntimeException | IOException e){
+        } catch (RuntimeException | IOException e) {
             throw new RuntimeException("No se pueden cargar los archivos ");
         }
     }

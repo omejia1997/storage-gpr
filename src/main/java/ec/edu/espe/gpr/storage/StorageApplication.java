@@ -17,10 +17,10 @@ public class StorageApplication {
 	@Bean
 	CommandLineRunner init(FileService fileService) {
 		return (args) -> {
-			fileService.deleteAllFileGuia();
 			fileService.deleteAll();
-			fileService.init();
-			fileService.initFileGuia();
+			fileService.initFilesInvestigacion();
+			fileService.initFilesVinculacion();
+			fileService.initFilesDocencia();
 		};
 	}
 }

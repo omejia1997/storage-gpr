@@ -28,9 +28,10 @@ public class FileController {
     @Autowired
     FileService fileService;
 
-    @GetMapping("/getfiles")
-    public ResponseEntity<List<FileModel>> getFiles() {
-        List<FileModel> fileInfos = fileService.loadAll().map(path -> {
+    /*@GetMapping("/getfiles/{modulo}")
+    public ResponseEntity<List<FileModel>> getFiles(@PathVariable String modulo) {
+
+        List<FileModel> fileInfos = fileService.loadAll(modulo).map(path -> {
             String filename = path.getFileName().toString();
             String url = MvcUriComponentsBuilder.fromMethodName(FileController.class, "getFile",
                     path.getFileName().toString()).build().toString();
@@ -38,47 +39,47 @@ public class FileController {
         }).collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(fileInfos);
-    }
+    }*/
 
-    @GetMapping("/getFileDocenteTarea/{filename}/{nombreArchivoTareaDocente}")
-    public ResponseEntity<FileModel> getFileDocenteTarea(@PathVariable String filename,
+    @GetMapping("/getFileDocenteTarea/{modulo}/{filename}/{nombreArchivoTareaDocente}")
+    public ResponseEntity<FileModel> getFileDocenteTarea(@PathVariable String modulo,@PathVariable String filename,
             @PathVariable String nombreArchivoTareaDocente) {
         String url = MvcUriComponentsBuilder.fromMethodName(FileController.class, "getFile",
-                filename,nombreArchivoTareaDocente).build().toString();
+                modulo,filename,nombreArchivoTareaDocente).build().toString();
         FileModel fileModel = new FileModel(filename, url);
         return ResponseEntity.status(HttpStatus.OK).body(fileModel);
     }
 
-    @GetMapping("/files/{filename:.+}/{nombreArchivoTareaDocente:.+}")
-    public ResponseEntity<Resource> getFile(@PathVariable String filename,
+    @GetMapping("/files/{modulo}/{filename:.+}/{nombreArchivoTareaDocente:.+}")
+    public ResponseEntity<Resource> getFile(@PathVariable String modulo,@PathVariable String filename,
             @PathVariable String nombreArchivoTareaDocente) {
-        Resource file = fileService.load(filename);
+        Resource file = fileService.load(modulo,nombreArchivoTareaDocente);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + nombreArchivoTareaDocente + "\"").body(file);
+                "attachment; filename=\"" + filename + "\"").body(file);
     }
 
-    @GetMapping("/getFileTarea/{filename}/{nombreArchivoTarea}")
-    public ResponseEntity<FileModel> getFileTarea(@PathVariable String filename,
+    @GetMapping("/getFileTarea/{modulo}/{filename}/{nombreArchivoTarea}")
+    public ResponseEntity<FileModel> getFileTarea(@PathVariable String modulo,@PathVariable String filename,
             @PathVariable String nombreArchivoTarea) {
 
         String url = MvcUriComponentsBuilder.fromMethodName(FileController.class, "getFileTareaGuia",
-                filename, nombreArchivoTarea).build().toString();
+                modulo,filename, nombreArchivoTarea).build().toString();
         FileModel fileModel = new FileModel(filename, url);
 
         return ResponseEntity.status(HttpStatus.OK).body(fileModel);
     }
 
-    @GetMapping("/fileTareaGuia/{filename:.+}/{nombreArchivoTarea:.+}")
-    public ResponseEntity<Resource> getFileTareaGuia(@PathVariable String filename,
+    @GetMapping("/fileTareaGuia/{modulo}/{filename:.+}/{nombreArchivoTarea:.+}")
+    public ResponseEntity<Resource> getFileTareaGuia(@PathVariable String modulo,@PathVariable String filename,
             @PathVariable String nombreArchivoTarea) {
-        Resource file = fileService.loadFileTarea(filename);
+        Resource file = fileService.loadFileTarea(modulo,nombreArchivoTarea);
         // String[] fileProperties = filename.split("\\.");
         // Tarea tarea = this.fileService.getTarea(Integer.parseInt(fileProperties[0]));
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + nombreArchivoTarea + "\"").body(file);
+                "attachment; filename=\"" + filename + "\"").body(file);
     }
 
-    @PostMapping("/upload")
+    /*@PostMapping("/upload")
     public ResponseEntity<String> uploadFiles(@RequestParam("file") MultipartFile file) {
         String message = "";
         try {
@@ -89,15 +90,17 @@ public class FileController {
             message = "Fallo al subir los archivos";
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
         }
-    }
+    }*/
 
     @PostMapping("/saveFileGuia/{modulo}")
-    public ResponseEntity<String> saveFileGuia(@PathVariable String modulo,@RequestBody FileRequest fileRequest) {
+    public ResponseEntity<String> saveFileGuia(@PathVariable String modulo,@RequestParam("file") MultipartFile file,
+                                               @RequestParam("nameFile") String nameFile ) {
         String message = "";
         try {
-            this.fileService.saveFileGuia(fileRequest.getFile(), fileRequest.getNameFile(),modulo);
+            this.fileService.saveFileGuia(file, nameFile,modulo);
             message = "Se subieron los archivos correctamente ";
-            return ResponseEntity.status(HttpStatus.OK).body(message);
+            //return ResponseEntity.status(HttpStatus.OK).body(message);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             message = "Fallo al subir los archivos";
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);

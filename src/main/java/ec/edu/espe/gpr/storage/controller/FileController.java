@@ -108,12 +108,14 @@ public class FileController {
     }
 
     @PostMapping("/saveFile/{modulo}")
-    public ResponseEntity<String> saveFile(@PathVariable String modulo,@RequestBody FileRequest fileRequest) {
+    public ResponseEntity<String> saveFile(@PathVariable String modulo,@RequestParam("file") MultipartFile file,
+                                           @RequestParam("nameFile") String nameFile ) {
         String message = "";
         try {
-            this.fileService.saveFile(fileRequest.getFile(), fileRequest.getNameFile(),modulo);
+            this.fileService.saveFile(file, nameFile,modulo);
             message = "Se subieron los archivos correctamente ";
-            return ResponseEntity.status(HttpStatus.OK).body(message);
+            //return ResponseEntity.status(HttpStatus.OK).body(message);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             message = "Fallo al subir los archivos";
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);

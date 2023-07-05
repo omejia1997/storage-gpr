@@ -21,6 +21,7 @@ public class StorageApplication {
 			fileService.initFilesInvestigacion();
 			fileService.initFilesVinculacion();
 			fileService.initFilesDocencia();
+			fileService.getAllFilesAndSaveAll();
 		};
 	}
 }

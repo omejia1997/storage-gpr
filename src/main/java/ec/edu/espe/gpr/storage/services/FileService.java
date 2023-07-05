@@ -5,13 +5,19 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
+import ec.edu.espe.gpr.storage.config.BaseURLValues;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import ec.edu.espe.gpr.storage.enums.ModulosEnum;
@@ -25,6 +31,12 @@ public class FileService {
     private final Path rootFileGuiaVinculacion = Paths.get("archivo_guia_vinculacion");
     private final Path rootFilesDocencia = Paths.get("archivo_tarea_docencia");
     private final Path rootFileGuiaDocencia = Paths.get("archivo_guia_docencia");
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private BaseURLValues baseURLs;
 
     public void initFilesInvestigacion() {
         try {
@@ -272,5 +284,128 @@ public class FileService {
         }
 
         return null;
+    }
+
+    private void saveFileGuia(Resource file, String modulo) {
+        if (modulo.equals(ModulosEnum.INVESTIGACION.getValue())) {//Modulo a guardar
+            try {
+                //Files.deleteIfExists(this.rootFileGuiaInvestigacion.resolve(nameFile));
+                Files.copy(file.getInputStream(), this.rootFileGuiaInvestigacion.resolve(file.getFilename()));
+            } catch (IOException e) {
+                throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
+            }
+        } else if (modulo.equals(ModulosEnum.VINCULACION.getValue())) {
+            try {
+                //Files.deleteIfExists(this.rootFileGuiaVinculacion.resolve(nameFile));
+                Files.copy(file.getInputStream(), this.rootFileGuiaVinculacion.resolve(file.getFilename()));
+            } catch (IOException e) {
+                throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
+            }
+        } else if (modulo.equals(ModulosEnum.DOCENCIA.getValue())) {
+            try {
+                //Files.deleteIfExists(this.rootFileGuiaDocencia.resolve(nameFile));
+                Files.copy(file.getInputStream(), this.rootFileGuiaDocencia.resolve(file.getFilename()));
+            } catch (IOException e) {
+                throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
+            }
+        }
+    }
+
+    private void saveFile(Resource file,String modulo) {
+        if (modulo.equals(ModulosEnum.INVESTIGACION.getValue())) {//Modulo a guardar
+            try {
+                //Files.deleteIfExists(this.rootFilesUploadsInvestigacion.resolve(file.getFilename()));
+                Files.copy(file.getInputStream(), this.rootFilesUploadsInvestigacion.resolve(file.getFilename()));
+            } catch (IOException e) {
+                throw new RuntimeException("No se puede guardar el archivo. Error " +
+                        e.getMessage());
+            }
+        } else if (modulo.equals(ModulosEnum.VINCULACION.getValue())) {//Modulo a guardar
+            try {
+                //Files.deleteIfExists(this.rootFilesVinculacion.resolve(nameFile));
+                Files.copy(file.getInputStream(), this.rootFilesVinculacion.resolve(file.getFilename()));
+            } catch (IOException e) {
+                throw new RuntimeException("No se puede guardar el archivo. Error " +
+                        e.getMessage());
+            }
+        } else if (modulo.equals(ModulosEnum.DOCENCIA.getValue())) {//Modulo a guardar
+            try {
+                //Files.deleteIfExists(this.rootFilesDocencia.resolve(file.getFilename()));
+                Files.copy(file.getInputStream(), this.rootFilesDocencia.resolve(file.getFilename()));
+            } catch (IOException e) {
+                throw new RuntimeException("No se puede guardar el archivo. Error " +
+                        e.getMessage());
+            }
+        }
+    }
+
+    public void getAllFilesAndSaveAll(){
+        //Investigación
+        ResponseEntity<Resource[]> response = this.restTemplate.getForEntity(
+                baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
+                        + ModulosEnum.INVESTIGACION.getValue(),
+                Resource[].class);
+        Resource[] objectArray = response.getBody();
+        List<Resource> resources = Arrays.asList(objectArray);
+
+        for (Resource resource: resources) {
+            this.saveFile(resource,ModulosEnum.INVESTIGACION.getValue());
+        }
+
+        response = this.restTemplate.getForEntity(
+                baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
+                        + ModulosEnum.INVESTIGACION.getValue(),
+                Resource[].class);
+        objectArray = response.getBody();
+        resources = Arrays.asList(objectArray);
+
+        for (Resource resource: resources) {
+            this.saveFileGuia(resource,ModulosEnum.INVESTIGACION.getValue());
+        }
+
+        //Vinculación
+        response = this.restTemplate.getForEntity(
+                baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
+                        + ModulosEnum.VINCULACION.getValue(),
+                Resource[].class);
+        objectArray = response.getBody();
+        resources = Arrays.asList(objectArray);
+
+        for (Resource resource: resources) {
+            this.saveFile(resource,ModulosEnum.VINCULACION.getValue());
+        }
+
+        response = this.restTemplate.getForEntity(
+                baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
+                        + ModulosEnum.VINCULACION.getValue(),
+                Resource[].class);
+        objectArray = response.getBody();
+        resources = Arrays.asList(objectArray);
+
+        for (Resource resource: resources) {
+            this.saveFileGuia(resource,ModulosEnum.VINCULACION.getValue());
+        }
+        //Docencia
+        response = this.restTemplate.getForEntity(
+                baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
+                        + ModulosEnum.DOCENCIA.getValue(),
+                Resource[].class);
+        objectArray = response.getBody();
+        resources = Arrays.asList(objectArray);
+
+        for (Resource resource: resources) {
+            this.saveFile(resource,ModulosEnum.DOCENCIA.getValue());
+        }
+
+        response = this.restTemplate.getForEntity(
+                baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
+                        + ModulosEnum.DOCENCIA.getValue(),
+                Resource[].class);
+        objectArray = response.getBody();
+        resources = Arrays.asList(objectArray);
+
+        for (Resource resource: resources) {
+            this.saveFileGuia(resource,ModulosEnum.DOCENCIA.getValue());
+        }
     }
 }

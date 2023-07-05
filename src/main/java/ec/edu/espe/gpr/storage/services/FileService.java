@@ -214,7 +214,7 @@ public class FileService {
         FileSystemUtils.deleteRecursively(rootFileGuiaDocencia.toFile());
     }
 
-    /*public Stream<Path> loadAll(String modulo) {
+    public Stream<Path> loadAll(String modulo) {
         if(modulo.equals(ModulosEnum.INVESTIGACION.getValue())){
             try {
                 return Files.walk(this.rootFilesUploadsInvestigacion, 1)
@@ -242,5 +242,35 @@ public class FileService {
         }
 
         return null;
-    }*/
+    }
+
+    public Stream<Path> loadAllFilesGuide(String modulo) {
+        if(modulo.equals(ModulosEnum.INVESTIGACION.getValue())){
+            try {
+                return Files.walk(this.rootFileGuiaInvestigacion, 1)
+                        .filter(path -> !path.equals(this.rootFileGuiaInvestigacion))
+                        .map(this.rootFileGuiaInvestigacion::relativize);
+            } catch (RuntimeException | IOException e) {
+                throw new RuntimeException("No se pueden cargar los archivos ");
+            }
+        } else if (modulo.equals(ModulosEnum.VINCULACION.getValue())) {
+            try {
+                return Files.walk(this.rootFileGuiaVinculacion, 1)
+                        .filter(path -> !path.equals(this.rootFileGuiaVinculacion))
+                        .map(this.rootFileGuiaVinculacion::relativize);
+            } catch (RuntimeException | IOException e) {
+                throw new RuntimeException("No se pueden cargar los archivos ");
+            }
+        } else if (modulo.equals(ModulosEnum.DOCENCIA.getValue())) {
+            try {
+                return Files.walk(this.rootFileGuiaDocencia, 1)
+                        .filter(path -> !path.equals(this.rootFileGuiaDocencia))
+                        .map(this.rootFileGuiaDocencia::relativize);
+            } catch (RuntimeException | IOException e) {
+                throw new RuntimeException("No se pueden cargar los archivos ");
+            }
+        }
+
+        return null;
+    }
 }

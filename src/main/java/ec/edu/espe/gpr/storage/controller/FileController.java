@@ -1,25 +1,20 @@
 package ec.edu.espe.gpr.storage.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import ec.edu.espe.gpr.storage.model.FileModel;
+import ec.edu.espe.gpr.storage.services.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
-import ec.edu.espe.gpr.storage.model.FileModel;
-import ec.edu.espe.gpr.storage.model.FileRequest;
-import ec.edu.espe.gpr.storage.services.FileService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @CrossOrigin("*")
@@ -28,18 +23,41 @@ public class FileController {
     @Autowired
     FileService fileService;
 
-    /*@GetMapping("/getfiles/{modulo}")
-    public ResponseEntity<List<FileModel>> getFiles(@PathVariable String modulo) {
+    @GetMapping("/getAllfilesTasksDocent/{modulo}")
+    public ResponseEntity<List<Resource>> getAllfilesTasksDocent(@PathVariable String modulo) {
 
-        List<FileModel> fileInfos = fileService.loadAll(modulo).map(path -> {
+        List<String> fileNames = fileService.loadAll(modulo).map(path -> {
             String filename = path.getFileName().toString();
-            String url = MvcUriComponentsBuilder.fromMethodName(FileController.class, "getFile",
+            /*String url = MvcUriComponentsBuilder.fromMethodName(FileController.class, "getFile",
                     path.getFileName().toString()).build().toString();
-            return new FileModel(filename, url);
+            return new FileModel(filename, url);*/
+            return filename;
         }).collect(Collectors.toList());
+        List<Resource> resources = new ArrayList<>();
+        for (String fileName:fileNames) {
+            Resource resource = fileService.load(modulo,fileName);
+            resources.add(resource);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(resources);
+    }
 
-        return ResponseEntity.status(HttpStatus.OK).body(fileInfos);
-    }*/
+    @GetMapping("/getAllfilesTasks/{modulo}")
+    public ResponseEntity<List<Resource>> getAllfilesTasks(@PathVariable String modulo) {
+
+        List<String> fileNames = fileService.loadAllFilesGuide(modulo).map(path -> {
+            String filename = path.getFileName().toString();
+            /*String url = MvcUriComponentsBuilder.fromMethodName(FileController.class, "getFile",
+                    path.getFileName().toString()).build().toString();
+            return new FileModel(filename, url);*/
+            return filename;
+        }).collect(Collectors.toList());
+        List<Resource> resources = new ArrayList<>();
+        for (String fileName:fileNames) {
+            Resource resource = fileService.load(modulo,fileName);
+            resources.add(resource);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(resources);
+    }
 
     @GetMapping("/getFileDocenteTarea/{modulo}/{filename}/{nombreArchivoTareaDocente}")
     public ResponseEntity<FileModel> getFileDocenteTarea(@PathVariable String modulo,@PathVariable String filename,
@@ -61,11 +79,9 @@ public class FileController {
     @GetMapping("/getFileTarea/{modulo}/{filename}/{nombreArchivoTarea}")
     public ResponseEntity<FileModel> getFileTarea(@PathVariable String modulo,@PathVariable String filename,
             @PathVariable String nombreArchivoTarea) {
-
         String url = MvcUriComponentsBuilder.fromMethodName(FileController.class, "getFileTareaGuia",
                 modulo,filename, nombreArchivoTarea).build().toString();
         FileModel fileModel = new FileModel(filename, url);
-
         return ResponseEntity.status(HttpStatus.OK).body(fileModel);
     }
 

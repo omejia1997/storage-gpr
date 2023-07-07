@@ -342,7 +342,7 @@ public class FileService {
     public void getAllFilesAndSaveAll(){
         //Investigación
         ResponseEntity<Resource[]> response = this.restTemplate.getForEntity(
-                baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
+                this.baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
                         + ModulosEnum.INVESTIGACION.getValue(),
                 Resource[].class);
         Resource[] objectArray = response.getBody();
@@ -353,7 +353,7 @@ public class FileService {
         }
 
         response = this.restTemplate.getForEntity(
-                baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
+                this.baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
                         + ModulosEnum.INVESTIGACION.getValue(),
                 Resource[].class);
         objectArray = response.getBody();
@@ -365,7 +365,7 @@ public class FileService {
 
         //Vinculación
         response = this.restTemplate.getForEntity(
-                baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
+                this.baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
                         + ModulosEnum.VINCULACION.getValue(),
                 Resource[].class);
         objectArray = response.getBody();
@@ -376,7 +376,7 @@ public class FileService {
         }
 
         response = this.restTemplate.getForEntity(
-                baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
+                this.baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
                         + ModulosEnum.VINCULACION.getValue(),
                 Resource[].class);
         objectArray = response.getBody();
@@ -387,7 +387,7 @@ public class FileService {
         }
         //Docencia
         response = this.restTemplate.getForEntity(
-                baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
+                this.baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
                         + ModulosEnum.DOCENCIA.getValue(),
                 Resource[].class);
         objectArray = response.getBody();
@@ -398,7 +398,7 @@ public class FileService {
         }
 
         response = this.restTemplate.getForEntity(
-                baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
+                this.baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
                         + ModulosEnum.DOCENCIA.getValue(),
                 Resource[].class);
         objectArray = response.getBody();

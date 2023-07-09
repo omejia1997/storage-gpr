@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -340,15 +341,45 @@ public class FileService {
     }
 
     public void getAllFilesAndSaveAll(){
-        //Investigación
-        ResponseEntity<Resource[]> response = this.restTemplate.getForEntity(
-                this.baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
-                        + ModulosEnum.INVESTIGACION.getValue(),
-                Resource[].class);
-        Resource[] objectArray = response.getBody();
-        List<Resource> resources = Arrays.asList(objectArray);
+        ArrayList<String> modulos = new ArrayList<>();
+        modulos.add(ModulosEnum.INVESTIGACION.getValue());
+        modulos.add(ModulosEnum.VINCULACION.getValue());
+        modulos.add(ModulosEnum.DOCENCIA.getValue());
+        for (String modulo:modulos) {
+            ResponseEntity<String[]> response = this.restTemplate.getForEntity(
+                    this.baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
+                            + modulo,
+                    String[].class);
+            String[] objectArray = response.getBody();
+            List<String> fileNames = Arrays.asList(objectArray);
 
-        for (Resource resource: resources) {
+            for (String fileName:fileNames) {
+                ResponseEntity<Resource> responseResource = this.restTemplate.getForEntity(
+                        this.baseURLs.getGprStorageURL() + "/getFileTasksDocent/"
+                                + modulo +"/"+fileName,
+                        Resource.class);
+                Resource resourceFile = responseResource.getBody();
+                this.saveFile(resourceFile,ModulosEnum.INVESTIGACION.getValue());
+            }
+
+            response = this.restTemplate.getForEntity(
+                    this.baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
+                            + modulo,
+                    String[].class);
+            objectArray = response.getBody();
+            fileNames = Arrays.asList(objectArray);
+            for (String fileName:fileNames) {
+                ResponseEntity<Resource> responseResource = this.restTemplate.getForEntity(
+                        this.baseURLs.getGprStorageURL() + "/getFileTask/"
+                                + modulo+"/"+fileName,
+                        Resource.class);
+                Resource resourceFile = responseResource.getBody();
+                this.saveFile(resourceFile,ModulosEnum.INVESTIGACION.getValue());
+            }
+        }
+
+
+        /*for (Resource resource: resources) {
             this.saveFile(resource,ModulosEnum.INVESTIGACION.getValue());
         }
 
@@ -406,6 +437,6 @@ public class FileService {
 
         for (Resource resource: resources) {
             this.saveFileGuia(resource,ModulosEnum.DOCENCIA.getValue());
-        }
+        }*/
     }
 }

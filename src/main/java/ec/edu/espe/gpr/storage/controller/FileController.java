@@ -24,39 +24,36 @@ public class FileController {
     FileService fileService;
 
     @GetMapping("/getAllfilesTasksDocent/{modulo}")
-    public ResponseEntity<List<Resource>> getAllfilesTasksDocent(@PathVariable String modulo) {
-
+    public ResponseEntity<List<String>> getAllfilesTasksDocent(@PathVariable String modulo) {
         List<String> fileNames = fileService.loadAll(modulo).map(path -> {
             String filename = path.getFileName().toString();
-            /*String url = MvcUriComponentsBuilder.fromMethodName(FileController.class, "getFile",
-                    path.getFileName().toString()).build().toString();
-            return new FileModel(filename, url);*/
             return filename;
         }).collect(Collectors.toList());
-        List<Resource> resources = new ArrayList<>();
-        for (String fileName:fileNames) {
-            Resource resource = fileService.load(modulo,fileName);
-            resources.add(resource);
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(resources);
+
+        return ResponseEntity.ok(fileNames);
     }
 
+    @GetMapping("/getFileTasksDocent/{modulo}/{fileName}")
+    public ResponseEntity<Resource> getFileTasksDocent(@PathVariable String modulo,@PathVariable String fileName) {
+        Resource resource = fileService.load(modulo,fileName);
+        return ResponseEntity.status(HttpStatus.OK).body(resource);
+    }
+
+
     @GetMapping("/getAllfilesTasks/{modulo}")
-    public ResponseEntity<List<Resource>> getAllfilesTasks(@PathVariable String modulo) {
+    public ResponseEntity<List<String>> getAllfilesTasks(@PathVariable String modulo) {
 
         List<String> fileNames = fileService.loadAllFilesGuide(modulo).map(path -> {
             String filename = path.getFileName().toString();
-            /*String url = MvcUriComponentsBuilder.fromMethodName(FileController.class, "getFile",
-                    path.getFileName().toString()).build().toString();
-            return new FileModel(filename, url);*/
             return filename;
         }).collect(Collectors.toList());
-        List<Resource> resources = new ArrayList<>();
-        for (String fileName:fileNames) {
-            Resource resource = fileService.load(modulo,fileName);
-            resources.add(resource);
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(resources);
+        return ResponseEntity.ok(fileNames);
+    }
+
+    @GetMapping("/getFileTask/{modulo}/{fileName}")
+    public ResponseEntity<Resource> getFileTask(@PathVariable String modulo,@PathVariable String fileName) {
+        Resource resource = fileService.loadFileTarea(modulo,fileName);
+        return ResponseEntity.status(HttpStatus.OK).body(resource);
     }
 
     @GetMapping("/getFileDocenteTarea/{modulo}/{filename}/{nombreArchivoTareaDocente}")

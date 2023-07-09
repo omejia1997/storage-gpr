@@ -287,52 +287,49 @@ public class FileService {
         return null;
     }
 
-    private void saveFileGuia(Resource file, String modulo) {
+    private void saveFileGuia(Resource file, String modulo,String nameFile) {
         if (modulo.equals(ModulosEnum.INVESTIGACION.getValue())) {//Modulo a guardar
             try {
                 //Files.deleteIfExists(this.rootFileGuiaInvestigacion.resolve(nameFile));
-                Files.copy(file.getInputStream(), this.rootFileGuiaInvestigacion.resolve(file.getFilename()));
+                Files.copy(file.getInputStream(), this.rootFileGuiaInvestigacion.resolve(nameFile));
             } catch (IOException e) {
                 throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
             }
         } else if (modulo.equals(ModulosEnum.VINCULACION.getValue())) {
             try {
                 //Files.deleteIfExists(this.rootFileGuiaVinculacion.resolve(nameFile));
-                Files.copy(file.getInputStream(), this.rootFileGuiaVinculacion.resolve(file.getFilename()));
+                Files.copy(file.getInputStream(), this.rootFileGuiaVinculacion.resolve(nameFile));
             } catch (IOException e) {
                 throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
             }
         } else if (modulo.equals(ModulosEnum.DOCENCIA.getValue())) {
             try {
                 //Files.deleteIfExists(this.rootFileGuiaDocencia.resolve(nameFile));
-                Files.copy(file.getInputStream(), this.rootFileGuiaDocencia.resolve(file.getFilename()));
+                Files.copy(file.getInputStream(), this.rootFileGuiaDocencia.resolve(nameFile));
             } catch (IOException e) {
                 throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
             }
         }
     }
 
-    private void saveFile(Resource file,String modulo) {
+    private void saveFile(Resource file,String modulo,String nameFile) {
         if (modulo.equals(ModulosEnum.INVESTIGACION.getValue())) {//Modulo a guardar
             try {
-                //Files.deleteIfExists(this.rootFilesUploadsInvestigacion.resolve(file.getFilename()));
-                Files.copy(file.getInputStream(), this.rootFilesUploadsInvestigacion.resolve(file.getFilename()));
+                Files.copy(file.getInputStream(), this.rootFilesUploadsInvestigacion.resolve(nameFile));
             } catch (IOException e) {
                 throw new RuntimeException("No se puede guardar el archivo. Error " +
                         e.getMessage());
             }
         } else if (modulo.equals(ModulosEnum.VINCULACION.getValue())) {//Modulo a guardar
             try {
-                //Files.deleteIfExists(this.rootFilesVinculacion.resolve(nameFile));
-                Files.copy(file.getInputStream(), this.rootFilesVinculacion.resolve(file.getFilename()));
+                Files.copy(file.getInputStream(), this.rootFilesVinculacion.resolve(nameFile));
             } catch (IOException e) {
                 throw new RuntimeException("No se puede guardar el archivo. Error " +
                         e.getMessage());
             }
         } else if (modulo.equals(ModulosEnum.DOCENCIA.getValue())) {//Modulo a guardar
             try {
-                //Files.deleteIfExists(this.rootFilesDocencia.resolve(file.getFilename()));
-                Files.copy(file.getInputStream(), this.rootFilesDocencia.resolve(file.getFilename()));
+                Files.copy(file.getInputStream(), this.rootFilesDocencia.resolve(nameFile));
             } catch (IOException e) {
                 throw new RuntimeException("No se puede guardar el archivo. Error " +
                         e.getMessage());
@@ -359,7 +356,7 @@ public class FileService {
                                 + modulo +"/"+fileName,
                         Resource.class);
                 Resource resourceFile = responseResource.getBody();
-                this.saveFile(resourceFile,ModulosEnum.INVESTIGACION.getValue());
+                this.saveFile(resourceFile,modulo,fileName);
             }
 
             response = this.restTemplate.getForEntity(
@@ -374,7 +371,7 @@ public class FileService {
                                 + modulo+"/"+fileName,
                         Resource.class);
                 Resource resourceFile = responseResource.getBody();
-                this.saveFile(resourceFile,ModulosEnum.INVESTIGACION.getValue());
+                this.saveFileGuia(resourceFile,modulo,fileName);
             }
         }
 

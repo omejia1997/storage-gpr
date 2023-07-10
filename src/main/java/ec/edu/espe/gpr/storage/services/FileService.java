@@ -5,12 +5,11 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 import ec.edu.espe.gpr.storage.config.BaseURLValues;
+import ec.edu.espe.gpr.storage.model.FileSaveRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -337,11 +336,43 @@ public class FileService {
         }
     }
 
-    public void getAllFilesAndSaveAll(){
+    public Map<String, List<FileSaveRequest>> getAllFilesGuia(){
         ArrayList<String> modulos = new ArrayList<>();
         modulos.add(ModulosEnum.INVESTIGACION.getValue());
         modulos.add(ModulosEnum.VINCULACION.getValue());
         modulos.add(ModulosEnum.DOCENCIA.getValue());
+
+        Map<String, List<FileSaveRequest>> dataMap = new HashMap<String, List<FileSaveRequest>>();
+        for (String modulo:modulos) {
+            ResponseEntity<String[]> response = this.restTemplate.getForEntity(
+                    this.baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
+                            + modulo,
+                    String[].class);
+            String[] objectArray = response.getBody();
+            List<String> fileNames = Arrays.asList(objectArray);
+            List<FileSaveRequest> fileSaveRequests = new ArrayList<>();
+
+            for (String fileName:fileNames) {
+                ResponseEntity<Resource> responseResource = this.restTemplate.getForEntity(
+                        this.baseURLs.getGprStorageURL() + "/getFileTask/"
+                                + modulo+"/"+fileName,
+                        Resource.class);
+                Resource resourceFile = responseResource.getBody();
+                fileSaveRequests.add(new FileSaveRequest(fileName,resourceFile));
+                //this.saveFileGuia(resourceFile,modulo,fileName);
+            }
+            dataMap.put(modulo,fileSaveRequests);
+        }
+        return dataMap;
+    }
+
+    public Map<String, List<FileSaveRequest>> getAllFiles(){
+        ArrayList<String> modulos = new ArrayList<>();
+        modulos.add(ModulosEnum.INVESTIGACION.getValue());
+        modulos.add(ModulosEnum.VINCULACION.getValue());
+        modulos.add(ModulosEnum.DOCENCIA.getValue());
+
+        Map<String, List<FileSaveRequest>> dataMap = new HashMap<String, List<FileSaveRequest>>();
         for (String modulo:modulos) {
             ResponseEntity<String[]> response = this.restTemplate.getForEntity(
                     this.baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
@@ -350,15 +381,18 @@ public class FileService {
             String[] objectArray = response.getBody();
             List<String> fileNames = Arrays.asList(objectArray);
 
+            List<FileSaveRequest> fileSaveRequests = new ArrayList<>();
             for (String fileName:fileNames) {
                 ResponseEntity<Resource> responseResource = this.restTemplate.getForEntity(
                         this.baseURLs.getGprStorageURL() + "/getFileTasksDocent/"
                                 + modulo +"/"+fileName,
                         Resource.class);
                 Resource resourceFile = responseResource.getBody();
-                this.saveFile(resourceFile,modulo,fileName);
+                fileSaveRequests.add(new FileSaveRequest(fileName,resourceFile));
+                //this.saveFile(resourceFile,modulo,fileName);
             }
-
+            dataMap.put(modulo,fileSaveRequests);
+            /*
             response = this.restTemplate.getForEntity(
                     this.baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
                             + modulo,
@@ -372,68 +406,26 @@ public class FileService {
                         Resource.class);
                 Resource resourceFile = responseResource.getBody();
                 this.saveFileGuia(resourceFile,modulo,fileName);
+            }*/
+        }
+        return dataMap;
+    }
+
+    public void saveFilesGuia(Map<String, List<FileSaveRequest>> dataMap){
+        for (String modulo:dataMap.keySet()) {
+            List<FileSaveRequest> fileSaveRequests = dataMap.get(modulo);
+            for (FileSaveRequest fileSaveRequest:fileSaveRequests) {
+                this.saveFileGuia(fileSaveRequest.getFile(),modulo,fileSaveRequest.getNameFile());
             }
         }
+    }
 
-
-        /*for (Resource resource: resources) {
-            this.saveFile(resource,ModulosEnum.INVESTIGACION.getValue());
+    public void saveFiles(Map<String, List<FileSaveRequest>> dataMap){
+        for (String modulo:dataMap.keySet()) {
+            List<FileSaveRequest> fileSaveRequests = dataMap.get(modulo);
+            for (FileSaveRequest fileSaveRequest:fileSaveRequests) {
+                this.saveFile(fileSaveRequest.getFile(),modulo,fileSaveRequest.getNameFile());
+            }
         }
-
-        response = this.restTemplate.getForEntity(
-                this.baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
-                        + ModulosEnum.INVESTIGACION.getValue(),
-                Resource[].class);
-        objectArray = response.getBody();
-        resources = Arrays.asList(objectArray);
-
-        for (Resource resource: resources) {
-            this.saveFileGuia(resource,ModulosEnum.INVESTIGACION.getValue());
-        }
-
-        //Vinculación
-        response = this.restTemplate.getForEntity(
-                this.baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
-                        + ModulosEnum.VINCULACION.getValue(),
-                Resource[].class);
-        objectArray = response.getBody();
-        resources = Arrays.asList(objectArray);
-
-        for (Resource resource: resources) {
-            this.saveFile(resource,ModulosEnum.VINCULACION.getValue());
-        }
-
-        response = this.restTemplate.getForEntity(
-                this.baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
-                        + ModulosEnum.VINCULACION.getValue(),
-                Resource[].class);
-        objectArray = response.getBody();
-        resources = Arrays.asList(objectArray);
-
-        for (Resource resource: resources) {
-            this.saveFileGuia(resource,ModulosEnum.VINCULACION.getValue());
-        }
-        //Docencia
-        response = this.restTemplate.getForEntity(
-                this.baseURLs.getGprStorageURL() + "/getAllfilesTasksDocent/"
-                        + ModulosEnum.DOCENCIA.getValue(),
-                Resource[].class);
-        objectArray = response.getBody();
-        resources = Arrays.asList(objectArray);
-
-        for (Resource resource: resources) {
-            this.saveFile(resource,ModulosEnum.DOCENCIA.getValue());
-        }
-
-        response = this.restTemplate.getForEntity(
-                this.baseURLs.getGprStorageURL() + "/getAllfilesTasks/"
-                        + ModulosEnum.DOCENCIA.getValue(),
-                Resource[].class);
-        objectArray = response.getBody();
-        resources = Arrays.asList(objectArray);
-
-        for (Resource resource: resources) {
-            this.saveFileGuia(resource,ModulosEnum.DOCENCIA.getValue());
-        }*/
     }
 }

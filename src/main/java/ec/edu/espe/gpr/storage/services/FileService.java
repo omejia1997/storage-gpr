@@ -1,6 +1,8 @@
 package ec.edu.espe.gpr.storage.services;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -65,56 +67,75 @@ public class FileService {
         }
     }
 
-    public void saveFileGuia(MultipartFile file, String nameFile, String modulo) {
-        if (modulo.equals(ModulosEnum.INVESTIGACION.getValue())) {//Modulo a guardar
-            try {
-                Files.deleteIfExists(this.rootFileGuiaInvestigacion.resolve(nameFile));
-                Files.copy(file.getInputStream(), this.rootFileGuiaInvestigacion.resolve(nameFile));
-            } catch (IOException e) {
-                throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
+    private InputStream convertToInputStream(String base64String) throws IOException {
+        byte[] fileBytes = Base64.getDecoder().decode(base64String);
+        return new ByteArrayInputStream(fileBytes);
+    }
+
+    public void saveFileGuia(String fileBase64, String nameFile, String modulo,String previousNameFile) {
+        try {
+            InputStream file = this.convertToInputStream(fileBase64);
+            if (modulo.equals(ModulosEnum.INVESTIGACION.getValue())) {//Modulo a guardar
+                try {
+                    if(previousNameFile!=null) {
+                        Files.deleteIfExists(this.rootFileGuiaInvestigacion.resolve(previousNameFile));
+                    }
+                    Files.copy(file, this.rootFileGuiaInvestigacion.resolve(nameFile));
+                } catch (IOException e) {
+                    throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
+                }
+            } else if (modulo.equals(ModulosEnum.VINCULACION.getValue())) {
+                try {
+                    Files.deleteIfExists(this.rootFileGuiaVinculacion.resolve(nameFile));
+                    Files.copy(file, this.rootFileGuiaVinculacion.resolve(nameFile));
+                } catch (IOException e) {
+                    throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
+                }
+            } else if (modulo.equals(ModulosEnum.DOCENCIA.getValue())) {
+                try {
+                    Files.deleteIfExists(this.rootFileGuiaDocencia.resolve(nameFile));
+                    Files.copy(file, this.rootFileGuiaDocencia.resolve(nameFile));
+                } catch (IOException e) {
+                    throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
+                }
             }
-        } else if (modulo.equals(ModulosEnum.VINCULACION.getValue())) {
-            try {
-                Files.deleteIfExists(this.rootFileGuiaVinculacion.resolve(nameFile));
-                Files.copy(file.getInputStream(), this.rootFileGuiaVinculacion.resolve(nameFile));
-            } catch (IOException e) {
-                throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
-            }
-        } else if (modulo.equals(ModulosEnum.DOCENCIA.getValue())) {
-            try {
-                Files.deleteIfExists(this.rootFileGuiaDocencia.resolve(nameFile));
-                Files.copy(file.getInputStream(), this.rootFileGuiaDocencia.resolve(nameFile));
-            } catch (IOException e) {
-                throw new RuntimeException("No se puede guardar el archivo. Error " + e.getMessage());
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    public void saveFile(MultipartFile file, String nameFile,String modulo) {
-        if (modulo.equals(ModulosEnum.INVESTIGACION.getValue())) {//Modulo a guardar
-            try {
-                Files.deleteIfExists(this.rootFilesUploadsInvestigacion.resolve(nameFile));
-                Files.copy(file.getInputStream(), this.rootFilesUploadsInvestigacion.resolve(nameFile));
-            } catch (IOException e) {
-                throw new RuntimeException("No se puede guardar el archivo. Error " +
-                        e.getMessage());
+    public void saveFile(String fileBase64, String nameFile, String modulo,String previousNameFile) {
+        try {
+            InputStream file = this.convertToInputStream(fileBase64);
+            if (modulo.equals(ModulosEnum.INVESTIGACION.getValue())) {//Modulo a guardar
+                try {
+                    if(previousNameFile!=null) {
+                        Files.deleteIfExists(this.rootFilesUploadsInvestigacion.resolve(nameFile));
+                    }
+                    Files.copy(file, this.rootFilesUploadsInvestigacion.resolve(nameFile));
+                } catch (IOException e) {
+                    throw new RuntimeException("No se puede guardar el archivo. Error " +
+                            e.getMessage());
+                }
+            } else if (modulo.equals(ModulosEnum.VINCULACION.getValue())) {//Modulo a guardar
+                try {
+                    Files.deleteIfExists(this.rootFilesVinculacion.resolve(nameFile));
+                    Files.copy(file, this.rootFilesVinculacion.resolve(nameFile));
+                } catch (IOException e) {
+                    throw new RuntimeException("No se puede guardar el archivo. Error " +
+                            e.getMessage());
+                }
+            } else if (modulo.equals(ModulosEnum.DOCENCIA.getValue())) {//Modulo a guardar
+                try {
+                    Files.deleteIfExists(this.rootFilesDocencia.resolve(nameFile));
+                    Files.copy(file, this.rootFilesDocencia.resolve(nameFile));
+                } catch (IOException e) {
+                    throw new RuntimeException("No se puede guardar el archivo. Error " +
+                            e.getMessage());
+                }
             }
-        } else if (modulo.equals(ModulosEnum.VINCULACION.getValue())) {//Modulo a guardar
-            try {
-                Files.deleteIfExists(this.rootFilesVinculacion.resolve(nameFile));
-                Files.copy(file.getInputStream(), this.rootFilesVinculacion.resolve(nameFile));
-            } catch (IOException e) {
-                throw new RuntimeException("No se puede guardar el archivo. Error " +
-                        e.getMessage());
-            }
-        } else if (modulo.equals(ModulosEnum.DOCENCIA.getValue())) {//Modulo a guardar
-            try {
-                Files.deleteIfExists(this.rootFilesDocencia.resolve(nameFile));
-                Files.copy(file.getInputStream(), this.rootFilesDocencia.resolve(nameFile));
-            } catch (IOException e) {
-                throw new RuntimeException("No se puede guardar el archivo. Error " +
-                        e.getMessage());
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

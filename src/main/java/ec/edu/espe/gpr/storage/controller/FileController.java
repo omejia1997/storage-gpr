@@ -1,6 +1,7 @@
 package ec.edu.espe.gpr.storage.controller;
 
 import ec.edu.espe.gpr.storage.model.FileModel;
+import ec.edu.espe.gpr.storage.model.FileRequest;
 import ec.edu.espe.gpr.storage.services.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -105,7 +106,7 @@ public class FileController {
         }
     }*/
 
-    @PostMapping("/saveFileGuia/{modulo}")
+    /*@PostMapping("/saveFileGuia/{modulo}")
     public ResponseEntity<String> saveFileGuia(@PathVariable String modulo,@RequestParam("file") MultipartFile file,
                                                @RequestParam("nameFile") String nameFile ) {
         String message = "";
@@ -118,14 +119,41 @@ public class FileController {
             message = "Fallo al subir los archivos";
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
         }
+    }*/
+    @PostMapping("/saveFileGuia/{modulo}")
+    public ResponseEntity<String> saveFileGuia(@PathVariable String modulo, @RequestBody FileRequest fileRequest) {
+        String message = "";
+        try {
+            this.fileService.saveFileGuia(fileRequest.getFileBase64(),fileRequest.getNameFile(),modulo,fileRequest.getPreviousNameFile());
+            message = "Se subieron los archivos correctamente ";
+            //return ResponseEntity.status(HttpStatus.OK).body(message);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            message = "Fallo al subir los archivos";
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
+        }
     }
 
-    @PostMapping("/saveFile/{modulo}")
+    /*@PostMapping("/saveFile/{modulo}")
     public ResponseEntity<String> saveFile(@PathVariable String modulo,@RequestParam("file") MultipartFile file,
                                            @RequestParam("nameFile") String nameFile ) {
         String message = "";
         try {
             this.fileService.saveFile(file, nameFile,modulo);
+            message = "Se subieron los archivos correctamente ";
+            //return ResponseEntity.status(HttpStatus.OK).body(message);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            message = "Fallo al subir los archivos";
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
+        }
+    }*/
+
+    @PostMapping("/saveFile/{modulo}")
+    public ResponseEntity<String> saveFile(@PathVariable String modulo, @RequestBody FileRequest fileRequest) {
+        String message = "";
+        try {
+            this.fileService.saveFile(fileRequest.getFileBase64(),fileRequest.getNameFile(),modulo,fileRequest.getPreviousNameFile());
             message = "Se subieron los archivos correctamente ";
             //return ResponseEntity.status(HttpStatus.OK).body(message);
             return ResponseEntity.ok().build();
